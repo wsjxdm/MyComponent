@@ -1,5 +1,16 @@
-import React from 'react';
+import type { HeaderGroup } from '../types';
+import { HeaderCell } from './HeaderCell';
 
-export const HeaderRow = () => {
-  return <tr></tr>;
+interface HeaderRowProps {
+  headerGroup: HeaderGroup<any>;
+}
+
+export const HeaderRow = ({ headerGroup }: HeaderRowProps) => {
+  return (
+    <tr>
+      {headerGroup.headers.map(header => (
+        <HeaderCell key={header.key} header={header} />
+      ))}
+    </tr>
+  );
 };

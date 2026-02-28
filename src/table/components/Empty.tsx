@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Empty = () => {
-  return <div>No Data</div>;
+  return <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>No Data</div>;
 };

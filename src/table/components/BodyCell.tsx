@@ -1,5 +1,13 @@
-import React from 'react';
+import type { Cell } from '../types';
 
-export const BodyCell = () => {
-  return <td></td>;
+interface BodyCellProps {
+  cell: Cell<any>;
+}
+
+export const BodyCell = ({ cell }: BodyCellProps) => {
+  return (
+    <td style={{ border: '1px solid #ccc', padding: '8px' }}>
+      {cell.render()}
+    </td>
+  );
 };
