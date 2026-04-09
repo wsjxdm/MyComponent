@@ -5,9 +5,6 @@ import type { Filter } from "../types"
 import { createRowSelectModel } from "./rowSelectMedel"
 import { useMemo } from "react"
 
-/**
- * @deprecated use useTable instead
- */
 export function useTable(props: any) {
     const columns = useMemo(() => columnManager(props.columns), [props.columns])
     const rowModel = useMemo(() => createRowModel(
@@ -31,5 +28,3 @@ export function useTable(props: any) {
 
     return instance;
 }
-
-export { useTable as createTable };
