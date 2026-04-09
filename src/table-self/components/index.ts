@@ -1,16 +1,16 @@
 import { Table } from "./table";
 
-import { TableHeader } from "./TableHeader";
+import { TableHeader } from "./tableHeader";
 
-import { HeaderRow } from "./HeaderRow";
+import { HeaderRow } from "./headerRow";
 
-import { TableBody } from "./TableBody";
+import { TableBody } from "./tableBody";
 
-import { BodyRow } from "./BodyRow";
+import { BodyRow } from "./bodyRow";
 
 import { HeadCell } from "./headCell";
 
-import { BodyCell } from "./BodyCell";
+import { BodyCell } from "./bodyCell";
 
 // 导出所有组件
 export {

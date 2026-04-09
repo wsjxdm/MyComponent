@@ -1,25 +1,29 @@
 import { columnManager } from "./columnManager"
 import { createRowModel } from "./rowModel"
+import { createFilterModel } from "./filterModel"
+import type { Filter } from "../types"
+import { createRowSelectModel } from "./rowSelectMedel"
+import { useMemo } from "react"
 
 export function createTable(props: any) {
-    // console.log('props', props)
-    // 1. 解析 columns
-    const columns = columnManager(props.columns)
-
-    // 2. 构建 rowModel
-    const rowModel = createRowModel(
+    const columns = useMemo(() => columnManager(props.columns), [props.columns])
+    const rowModel = useMemo(() => createRowModel(
         props.data,
         columns,
+    ), [props.data, columns])
+
+    const filterRowModel = useMemo(() => props.filter ? createFilterModel(rowModel, props.filter as Filter) : rowModel, [props.filter, rowModel])
+
+    const rowSelectModel = createRowSelectModel(
+        filterRowModel,
+        props.rowSelection?.selectedRowKeys || [],
+        props.rowSelection?.onChange
     )
 
-    // 3. 注册插件
-    // props.plugins?.forEach(plugin => {
-    //     plugin.initialize(instance)
-    // })
     const instance = {
         props,
         columns,
-        rowModel,
+        rowModel: rowSelectModel,
     }
 
     return instance;

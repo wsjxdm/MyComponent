@@ -1,5 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import styles from './table.module.css';
+
 interface Props {
   children?: ReactNode;
   fallback?: ReactNode;
@@ -29,13 +31,11 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
       return (
-        <tbody>
-          <tr>
-            <td colSpan={100} style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
-              Something went wrong in the table body.
-            </td>
-          </tr>
-        </tbody>
+        <div className={styles.tableBody}>
+          <div className={styles.errorState}>
+            Something went wrong in the table body.
+          </div>
+        </div>
       );
     }
 
