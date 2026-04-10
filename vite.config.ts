@@ -7,15 +7,10 @@ export default defineConfig(({ mode }) => {
 
   if (isSite) {
     // 网站/Demo 构建配置 (用于 GitHub Pages)
+    // 使用相对路径 './'，这样无论部署在 /current/ 还是 /versions/sha/ 都能正确找到资源
     return {
-      plugins: [react(),
-        // visualizer({
-        //   gzipSize: true,
-        //   brotliSize: true,
-        //   filename: 'dist/stats.html'
-        // })
-      ],
-      base: process.env.NODE_ENV === 'production' ? '/MyComponent/' : '/',
+      plugins: [react()],
+      base: './',
       build: {
         outDir: 'dist-site',
         sourcemap: true,
