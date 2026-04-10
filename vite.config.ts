@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
+import visualizer from 'rollup-plugin-visualizer'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // 根据环境变量或 mode 来决定构建目标
   const isSite = mode === 'site' || process.env.BUILD_TARGET === 'site';
@@ -9,7 +9,13 @@ export default defineConfig(({ mode }) => {
   if (isSite) {
     // 网站/Demo 构建配置 (用于 GitHub Pages)
     return {
-      plugins: [react()],
+      plugins: [react(),
+        // visualizer({
+        //   gzipSize: true,
+        //   brotliSize: true,
+        //   filename: 'dist/stats.html'
+        // })
+      ],
       base: process.env.NODE_ENV === 'production' ? '/MyComponent/' : '/',
       build: {
         outDir: 'dist-site',

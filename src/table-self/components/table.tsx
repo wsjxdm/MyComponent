@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import type { Column, Filter, SelectedKeysChange } from "../types";
 import { TableHeader, TableBody } from "./index";
 import { VirtualTableBody } from "./virtualTableBody";
-import { useTable } from "../core/useTable";
+import { useTable } from "../core/createTable";
 import { ErrorBoundary } from "./ErrorBoundary";
 import styles from './table.module.css';
 

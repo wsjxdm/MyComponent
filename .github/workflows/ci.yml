@@ -8,11 +8,9 @@ on:
   # 允许手动触发
   workflow_dispatch:
 
-# 设置权限以允许部署到 GitHub Pages
+# 设置权限以允许推送分支到 gh-pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 # 限制并发部署，确保只有一个正在运行
 concurrency:
@@ -60,27 +58,79 @@ jobs:
       - name: Build Website
         run: npm run build:site
 
-      # 配置 GitHub Pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Check bundle size
+        run: npx size-limit
 
-      # 上传构建好的静态文件作为 Pages 产物
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      # 上传构建好的静态文件作为产物
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: github-pages
           path: dist-site/
+          retention-days: 1
 
-  # Job 3: Deploy to GitHub Pages
+  # Job 3: Deploy to GitHub Pages (Versioned)
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy to GitHub Pages (Versioned)
     # 只有在 main 分支推送时且 lint/build 成功后才部署
     if: github.ref == 'refs/heads/main'
     needs: [lint, build]
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: dist-site/
+
+      - name: Set version
+        run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Deploy to gh-pages (versioned)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 配置 git
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          # 准备 gh-pages 目录
+          # 尝试克隆已有的 gh-pages 分支，如果不存在则创建一个新的
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git clone --depth=1 --branch gh-pages https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git gh-pages-repo
+          else
+            mkdir gh-pages-repo
+            cd gh-pages-repo
+            git init
+            git checkout -b gh-pages
+            git remote add origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+            cd ..
+          fi
+
+          cd gh-pages-repo
+
+          # 创建版本目录
+          mkdir -p versions/$VERSION
+          
+          # 拷贝构建产物到版本目录
+          # 使用 rsync 或 cp，这里用 cp
+          cp -r ../dist-site/* versions/$VERSION/
+
+          # 更新 current 目录 (始终指向最新版本)
+          rm -rf current
+          cp -r versions/$VERSION current
+          
+          # 创建一个根目录的 index.html 自动跳转到 current (可选但推荐)
+          if [ ! -f index.html ]; then
+            echo '<meta http-equiv="refresh" content="0; url=./current/">' > index.html
+          fi
+
+          # 提交并推送
+          git add .
+          git commit -m "deploy version $VERSION from ${{ github.sha }}" || echo "No changes to commit"
+          git push origin gh-pages
