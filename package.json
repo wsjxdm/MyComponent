@@ -38,8 +38,8 @@
   },
   "size-limit": [
     {
-      "path": "dist/index.es.js",
-      "limit": "50000 MB"
+      "path": "dist-site/assets/index-*.js",
+      "limit": "200 kB"
     }
   ]
 }
