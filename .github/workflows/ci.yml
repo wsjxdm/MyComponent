@@ -1,10 +1,23 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline and GitHub Pages Deployment
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # 允许手动触发
+  workflow_dispatch:
+
+# 设置权限以允许部署到 GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 限制并发部署，确保只有一个正在运行
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   # Job 1: Linting
@@ -27,9 +40,9 @@ jobs:
       - name: Run Lint
         run: npm run lint
 
-  # Job 2: Build
+  # Job 2: Build and Upload Pages Artifact
   build:
-    name: Build Application
+    name: Build Website
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -44,32 +57,30 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Build
-        run: npm run build
+      - name: Build Website
+        run: npm run build:site
 
-      # 上传构建产物 (Artifact) 供部署 Job 使用
-      - name: Upload Build Output
-        uses: actions/upload-artifact@v4
+      # 配置 GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 上传构建好的静态文件作为 Pages 产物
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: build-artifact
-          path: dist/
-          retention-days: 1
+          path: dist-site/
 
-  # Job 3: Deploy (Depends on lint and build)
+  # Job 3: Deploy to GitHub Pages
   deploy:
-    name: Deploy Application
-    needs: [lint, build] # 依然保持对 lint 和 build 的依赖
+    name: Deploy to GitHub Pages
+    # 只有在 main 分支推送时且 lint/build 成功后才部署
+    if: github.ref == 'refs/heads/main'
+    needs: [lint, build]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      # 下载构建产物 (Artifact)
-      - name: Download Build Output
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-          path: dist/
-
-      - name: Deploy Simulation
-        run: |
-          echo "Deploying application from build artifact..."
-          ls -R dist/
-          echo "Application deployed successfully!"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
