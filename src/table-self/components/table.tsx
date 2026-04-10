@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import type { Column, Filter, SelectedKeysChange } from "../types";
 import { TableHeader, TableBody } from "./index";
 import { VirtualTableBody } from "./virtualTableBody";
-import { useTable } from "../core/createTable";
+import { createTable } from "../core/createTable";
 import { ErrorBoundary } from "./ErrorBoundary";
 import styles from './table.module.css';
 
@@ -25,7 +25,7 @@ interface TableProps {
 export const Table = memo((props: TableProps) => {
     console.log("重渲染");
     const [filter, setFilter] = useState<Filter | null>(null);
-    const { columns, rowModel } = useTable({ ...props, filter });
+    const { columns, rowModel } = createTable({ ...props, filter });
     const { className, style, virtual, height, rowHeight, rowSelection } = props;
     const onRowSelectionChange = rowSelection?.onChange;
     const selectedRowKeys = rowModel.selectedkeys || [];
